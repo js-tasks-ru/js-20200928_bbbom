@@ -25,9 +25,3 @@ export function trimSymbols(string, size) {
   });
   return res;
 }
-//
-// console.log(trimSymbols('xxx', 2)); // 'xx' - удалили один символ
-// console.log(trimSymbols('xxx', 1)); // 'x'
-//
-// console.log(trimSymbols('xxxaaaaabbm', 2));
-// console.log(trimSymbols('xxxaaaaab', 3)); // 'xxxaaab'
