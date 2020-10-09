@@ -5,5 +5,13 @@
  * @returns {object} - returns the new object
  */
 export const omit = (obj, ...fields) => {
+  const newObj = {};
 
+  Object.entries(obj).forEach(([key, val]) => {
+    if (fields.indexOf(key) === -1) {
+      newObj[key] = val;
+    }
+  });
+
+  return newObj;
 };
