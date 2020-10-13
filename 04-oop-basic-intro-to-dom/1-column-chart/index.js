@@ -3,38 +3,49 @@ export default class ColumnChart {
   chart;
   chartHeight = 50;
 
-  constructor(attr = {}) {
-    const {data = [], label = '', value = '', link = ''} = attr;
-
+  constructor({
+    data = [],
+    label = '',
+    value = 0,
+    link = ''
+  } = {}) {
     this.data = data;
     this.label = label;
     this.value = value;
     this.link = link;
 
-    this.element =  document.createElement('div');
     this.render();
   }
 
   render() {
-    const el = this.element;
-    el.className = "column-chart";
-    el.style.cssText = "--chart-height: 50";
+    const el = document.createElement('div');
+    el.innerHTML = this.template();
+    this.element = el.firstElementChild;
 
-    el.innerHTML = `
-      <div class="column-chart__title">
-        Total ${this.label}
-        ${this.getLink()}
-      </div>
-      <div class="column-chart__container">
-        ${this.getHeader()}        
-      
-        <div data-element="body" class="column-chart__chart">
-          ${this.getChart(this.data)}
-        </div>
-      </div>      
-    `;
+    if (this.data.length) {
+      this.element.classList.remove('column-chart_loading');
+    }
 
     this.chart = this.element.querySelector('.column-chart__chart');
+  }
+
+  template() {
+    return `
+      <div class="column-chart column-chart_loading" style="--chart-height: ${this.chartHeight}">
+        <div class="column-chart__title">
+          Total ${this.label}
+          ${this.getLink()}
+        </div>
+        <div class="column-chart__container">
+          <div data-element="header" class="column-chart__header">
+            ${this.value}
+          </div>      
+          <div data-element="body" class="column-chart__chart">
+            ${this.getChart(this.data)}
+          </div>
+        </div> 
+      </div>     
+    `;
   }
 
   getLink() {
@@ -42,38 +53,27 @@ export default class ColumnChart {
     return href ? `<a class="column-chart__link" href="${href}">View all</a>` : '';
   }
 
-  getHeader() {
-    const val = typeof this.value === 'number' ? ('$' + this.value) : this.value;
-    return `
-      <div data-element="header" class="column-chart__header">
-        ${val}
-      </div>
-    `;
-  }
-
   getChart(arr) {
-    if (!arr) return;
-    if (arr.length === 0) {
-      this.element.classList.add('column-chart_loading');
-      return '';
-    }
+    const max = Math.max(...arr);
+    const scale = this.chartHeight / max;
 
-    return arr.reduce((acc, num) => {
-      const val = parseInt(num * 50 / 100);
-      return acc + `<div data-tooltip="${num}%" style="--value: ${val}"></div>`;
-    }, "");
+    return arr.map(item => {
+      const percent = Math.round(item * 100 / max);
+      return `<div data-tooltip="${percent}%" style="--value: ${Math.floor(item* scale)}"></div>`;
+    }).join('');
   }
 
-  update(newData){
-    this.element.classList.remove('column-chart_loading');
+  update(newData) {
     return this.chart.innerHTML = this.getChart(newData);
   }
 
-  destroy(){
-
+  destroy() {
+    this.remove();
+    this.element = null;
+    this.chart = '';
   }
 
-  remove(){
+  remove() {
     return this.element.remove();
   }
 }
