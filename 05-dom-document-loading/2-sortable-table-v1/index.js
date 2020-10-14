@@ -53,23 +53,19 @@ export default class SortableTable {
   }
 
   getTable (products) {
-    const table = [];
-    for (let product of products){
-      table.push(this.getTableRow(product));
-    }
-    return table.join('');
+    return products.reduce((acc, product) => [...acc, this.getTableRow(product)], []).join('');
   }
 
-  getTableRow ({title = '', images = [], quantity = 0, price = 0, sales = 0} = {}) {
-    const image = (images.length > 0) ? `<img class="sortable-table-image" alt="Image" src="${images[0].url}">` : '';
+  getTableRow (product) {
     return `
       <a href="/products/3d-ochki-epson-elpgs03" class="sortable-table__row">
-        <div class="sortable-table__cell">${image}</div>
-        <div class="sortable-table__cell">${title}</div>
-        <div class="sortable-table__cell">${quantity}</div>
-        <div class="sortable-table__cell">${price}</div>
-        <div class="sortable-table__cell">${sales}</div>
-      </a>`;
+        ${ 
+          this.header.map( 
+            item => (item.template) ? item.template(product[item.id]) : `<div class="sortable-table__cell">${product[item.id]}</div>`
+          ).join('')
+        }
+      </a>
+    `;
   }
 
   sort(field = 'title', order = 'asc') {
@@ -97,7 +93,7 @@ export default class SortableTable {
       return res;
     });
 
-    //this.subElements.header.innerHtml = this.getHeader(this.header, field, order);
+    this.subElements.header.innerHtml = this.getHeader(this.header, field, order);
     return this.subElements.body.innerHTML = this.getTable(sortTable);
   }
 
