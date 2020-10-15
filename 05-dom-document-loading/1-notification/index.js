@@ -1,8 +1,14 @@
 
-const notifications = document.getElementsByClassName('notification');
+const notifications = [];
 
 export default class NotificationMessage {
   element;
+
+  static cleanNotifications() {
+    if (notifications.length) {
+      [...notifications].forEach( item => item.remove() );
+    }
+  }
 
   constructor(message, {duration = 1000, type = 'success'} = {}){
     this.message = message;
@@ -12,16 +18,15 @@ export default class NotificationMessage {
   }
 
   render() {
+    notifications.length = 0;
     const el = document.createElement('div');
     el.innerHTML = this.template();
     this.element = el.firstElementChild;
   }
 
   show(target = document.body) {
-    if (notifications.length > 0) {
-      [...notifications].forEach( item => item.remove() );
-    }
     target.append(this.element);
+    notifications.push(this.element);
     setTimeout(() => this.remove(), this.duration);
   }
 
