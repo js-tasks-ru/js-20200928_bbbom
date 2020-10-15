@@ -73,27 +73,21 @@ export default class SortableTable {
     const currentHeaderItem = this.header.find(item => item.id === field);
     const sortType = currentHeaderItem ? currentHeaderItem.sortType : '';
 
-    let res = 0;
-
     sortTable.sort((item1, item2) => {
       const a = item1[field];
       const b = item2[field];
-      const c = (order === 'desc') ? -1 : 1;
+      const sortDirection = (order === 'desc') ? -1 : 1;
 
       switch (sortType) {
       case 'number':
-        res = c * (a - b);
-        break;
+        return sortDirection * (a - b);
       case 'string':
-        res = c * a.localeCompare(b, ['ru', 'en'], {caseFirst: 'upper'});
-        break;
+        return sortDirection * a.localeCompare(b, ['ru', 'en'], {caseFirst: 'upper'});
       default:
         break;
       }
-      return res;
     });
 
-    this.subElements.header.innerHtml = this.getHeader(this.header, field, order);
     return this.subElements.body.innerHTML = this.getTable(sortTable);
   }
 
