@@ -6,12 +6,21 @@
 </head>
 <body>
   <div id="root"></div>
-
+  <div id="test"></div>
   <script type="module">
     import DoubleSlider from './index.js';
 
-    const slider = new DoubleSlider();
-
+    const slider = new DoubleSlider({
+      min: 100,
+      max: 200,
+      formatValue: value => '$' + value,
+      selected: {
+        from: 120,
+        to: 150
+      }
+    });
+    const slider2 = new DoubleSlider();
     root.append(slider.element);
+    root.append(slider2.element);
   </script>
 </body>
