@@ -1,17 +1,10 @@
 export default class SortableTable {
   element;
   subElements = {};
-  sortedItem;
-  sortDirection;
   sortDefault = {
     field: 'title',
     order: 'asc',
   };
-  arrow = `
-      <span data-element='arrow' class="sortable-table__sort-arrow">
-        <span class="sort-arrow"/>
-      </span>
-  `;
 
   constructor(header = [], { data = [] } = {}) {
     this.header = header;
@@ -25,38 +18,35 @@ export default class SortableTable {
 
     this.element = el.firstElementChild;
     this.subElements = this.getSubElements(this.element);
-    this.subElements.header.addEventListener('click', this.sortHandler.bind(this));
+    this.subElements.header.addEventListener('click', this.sortHandler);
     this.sortTable(this.sortDefault.field, this.sortDefault.order);
   }
 
-  sortHandler(event) {
+  sortHandler = event => {
     const currentSortItem = event.target.closest('[data-sortable=true]');
 
     if (!currentSortItem) return;
 
-    if (this.sortedItem) {
-      if (this.sortedItem.dataset.id === currentSortItem.dataset.id) {
-        this.sortDirection = (this.sortedItem.dataset.order === 'desc') ? 'asc' : 'desc';
-      } else {
-        this.sortedItem.dataset.order = '';
-        let arrow = this.sortedItem.querySelector('[data-element=arrow]');
-        if(arrow) {
-          arrow.remove();
-        }
-        this.sortDirection = this.sortDefault.order;
-      }
-    }
+    const toggleSort = (direction) => {
+      const order = {
+        'asc': 'desc',
+        'desc': 'asc',
+      };
+      return order[direction];
+    };
 
-    if (!this.sortedItem || this.sortedItem.dataset.id !== currentSortItem.dataset.id) {
-      currentSortItem.insertAdjacentHTML('beforeend', this.arrow);
-    }
+    const arrow = currentSortItem.querySelector('.sortable-table__sort-arrow');
+    const order = currentSortItem.dataset.order ? toggleSort(currentSortItem.dataset.order) : this.sortDefault.order;
 
-    currentSortItem.dataset.order = this.sortDirection;
-    this.sortedItem = currentSortItem;
-    this.sortTable(currentSortItem.dataset.id, this.sortDirection);
-  }
+    currentSortItem.dataset.order = order;
 
-  getSubElements(element) {
+    if (!arrow)
+      currentSortItem.append(this.subElements.arrow);
+
+    this.sortTable(currentSortItem.dataset.id, order);
+  };
+
+  getSubElements (element) {
     const elements = element.querySelectorAll('[data-element]');
 
     return [...elements].reduce((acc, item) => {
@@ -70,7 +60,7 @@ export default class SortableTable {
       <div data-element="productsContainer" class="products-list__container">
         <div class="sortable-table" style="max-width: 1000px; margin: 20px auto;">
           <div data-element="header" class="sortable-table__header sortable-table__row">
-            ${this.getHeader(this.header, this.sortDefault)}
+            ${this.getHeader(this.header)}
           </div>
           <div data-element="body" class="sortable-table__body">
             ${this.getTable(this.data)}
@@ -80,21 +70,23 @@ export default class SortableTable {
     `;
   }
 
-  getHeader (arr, {field, order}) {
+  getHeader (arr, {field, order} = this.sortDefault) {
     return arr.map(({title, id, sortable}) => {
       const item = ` 
         <div class="sortable-table__cell" data-id="${id}" data-sortable="${sortable}" data-order="${field === id ? order : ''}">
           <span>${title}</span>
-          ${id === field ? this.arrow : ''}
+          ${id === field ? this.arrow() : ''}
         </div>`;
-      if (id === field) {
-        const div = document.createElement('div');
-        div.innerHTML = item;
-        this.sortedItem = div.firstElementChild;
-        this.sortDirection = order;
-      }
       return item;
     }).join('');
+  }
+
+  arrow () {
+    return `
+      <span data-element='arrow' class="sortable-table__sort-arrow">
+        <span class="sort-arrow"/>
+      </span>
+    `;
   }
 
   getTable (products) {
@@ -137,11 +129,12 @@ export default class SortableTable {
 
   remove () {
     this.element.remove();
+    this.subElements = {};
   }
 
   destroy() {
     this.remove();
-    this.subElements = {};
+
     // additionally needed to remove all listeners...
   }
 }
