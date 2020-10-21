@@ -9,7 +9,11 @@
   <script type="module">
     import DoubleSlider from './index.js';
 
-    const slider = new DoubleSlider();
+    const slider = new DoubleSlider({
+      min: 400,
+      max: 600,
+      formatValue: value => '$' + value,
+    });
 
     root.append(slider.element);
   </script>

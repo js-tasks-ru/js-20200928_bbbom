@@ -9,11 +9,11 @@ export default class DoubleSlider {
     right: 0,
   };
 
-  constructor ({min = 0, max = 100, formatValue = value => '$' + value, selected = {from: 0, to: 100}} = {}) {
+  constructor ({min = 0, max = 100, formatValue = value => '$' + value, selected} = {}) {
     this.min = min;
     this.max = max;
     this.formatValue = formatValue;
-    this.selected = selected;
+    this.selected = selected || { from: this.min, to: this.max} ;
     this.render();
   }
 
