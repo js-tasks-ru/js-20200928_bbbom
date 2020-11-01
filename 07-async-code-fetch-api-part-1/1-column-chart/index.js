@@ -26,10 +26,10 @@ export default class ColumnChart {
   }
 
   render() {
-    const el = document.createElement('div');
-    el.innerHTML = this.template();
+    const div = document.createElement('div');
+    div.innerHTML = this.template();
 
-    this.element = el.firstElementChild;
+    this.element = div.firstElementChild;
     this.subElements = this.getSubElements(this.element);
   }
 
@@ -50,10 +50,10 @@ export default class ColumnChart {
           ${this.getLink()}
         </div>
         <div class="column-chart__container">
-          <div data-element="header" class="column-chart__header"></div>      
+          <div data-element="header" class="column-chart__header"></div>
           <div data-element="body" class="column-chart__chart"></div>
-        </div> 
-      </div>     
+        </div>
+      </div>
     `;
   }
 
@@ -67,28 +67,31 @@ export default class ColumnChart {
     return href ? `<a class="column-chart__link" href="${href}">View all</a>` : '';
   }
 
-  async loadData (from = this.range.from, to = this.range.to) {
+  loadData (from = this.range.from, to = this.range.to) {
     this.element.classList.add('column-chart_loading');
     this.range = { from, to };
 
     this.url.searchParams.set('from', from.toISOString());
     this.url.searchParams.set('to', to.toISOString());
-    return await fetch(this.url)
+
+    fetch(this.url.toString())
       .then(response => response.json())
-      .then(data => {
-        const chart = this.getChart(data);
-        if(chart.length) {
-          this.subElements.body.innerHTML = chart;
-        }
-        this.subElements.header.innerHTML = this.getHeaderValue(data);
-      })
+      .then(data => this.updateData(data))
       .catch(error => new Error(error));
   }
 
-  getChart(data){
+  updateData (data) {
+    const chart = this.getChart(data);
+    if (chart.length) {
+      this.subElements.body.innerHTML = chart;
+    }
+    this.subElements.header.innerHTML = this.getHeaderValue(data);
+  }
+
+  getChart(data) {
     const dataValues = Object.values(data);
 
-    if(dataValues.length > 0) {
+    if (dataValues.length > 0) {
       this.element.classList.remove('column-chart_loading');
     }
     const max = Math.max(...dataValues);

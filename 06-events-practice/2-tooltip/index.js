@@ -19,10 +19,10 @@ class Tooltip {
   }
 
   showTooltip = event => {
-    const target = event.target.closest('[data-tooltip]');
-    if (!target) return;
+    const tooltipElement = event.target.closest('[data-tooltip]');
+    if (!tooltipElement) return;
 
-    this.render(target.dataset.tooltip);
+    this.render(tooltipElement.dataset.tooltip);
     this.moveTooltip(event);
 
     document.addEventListener('pointermove', this.moveTooltip);

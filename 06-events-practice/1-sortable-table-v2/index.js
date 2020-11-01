@@ -13,10 +13,10 @@ export default class SortableTable {
   }
 
   render() {
-    const el = document.createElement('div');
-    el.innerHTML = this.template();
+    const div = document.createElement('div');
+    div.innerHTML = this.template();
 
-    this.element = el.firstElementChild;
+    this.element = div.firstElementChild;
     this.subElements = this.getSubElements(this.element);
     this.subElements.header.addEventListener('pointerdown', this.sortHandler);
     this.sortTable(this.sortDefault.field, this.sortDefault.order);
