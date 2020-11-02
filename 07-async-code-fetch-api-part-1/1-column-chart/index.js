@@ -74,7 +74,7 @@ export default class ColumnChart {
     this.url.searchParams.set('from', from.toISOString());
     this.url.searchParams.set('to', to.toISOString());
 
-    fetch(this.url.toString())
+    return fetch(this.url.toString())
       .then(response => response.json())
       .then(data => this.updateData(data))
       .catch(error => new Error(error));
