@@ -24,10 +24,9 @@ export default class SortableTable {
     this.isSortOnServer = isSortOnServer;
     this.sorted = sorted;
     this.render();
-    this.getData();
   }
 
-  render() {
+  async render() {
     const div = document.createElement('div');
     div.innerHTML = this.template();
 
@@ -36,6 +35,7 @@ export default class SortableTable {
     this.subElements.header.addEventListener('pointerdown', this.sortHandler);
 
     document.addEventListener('scroll', this.scrollHandler);
+    await this.getData();
   }
 
   scrollHandler = async () => {
