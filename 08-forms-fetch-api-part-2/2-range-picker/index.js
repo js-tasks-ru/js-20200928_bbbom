@@ -3,14 +3,14 @@ export default class RangePicker {
   element;
   subElements;
   beginSelecting = true;
+  dateOfFirstMonth;
 
   constructor ({from = new Date(), to = new Date()} = {}) {
     this.selected = {
       from: from,
-      to: to,
-      currentMonth: from
+      to: to
     };
-
+    this.dateOfFirstMonth = new Date(from);
     this.render();
   }
 
@@ -34,31 +34,24 @@ export default class RangePicker {
     }, {});
   }
 
-  onClickInputHandler = () => {
-    const { selector } = this.subElements;
+  onClickPrevMonth = () => {
+    this.dateOfFirstMonth.setMonth(this.dateOfFirstMonth.getMonth() - 1);
+    this.addCalendar(this.dateOfFirstMonth);
+  }
 
-    if (!selector.hasChildNodes()) {
-      selector.innerHTML = this.selectorTemplate(this.selected.from);
-      this.calendarHighlight();
-    }
+  onClickNextMonth = () => {
+    this.dateOfFirstMonth.setMonth(this.dateOfFirstMonth.getMonth() + 1);
+    this.addCalendar();
+  }
+
+  onClickInputHandler = () => {
+    if (!this.subElements.selector.hasChildNodes())
+      this.addCalendar();
+
     this.close();
   }
 
-  close = () => {
-    this.element.classList.toggle("rangepicker_open");
-  }
-
   onClickHandler = (event) => {
-    const prevMonthBtn = event.target.closest(".rangepicker__selector-control-left");
-
-    if (prevMonthBtn)
-      return this.updateSelector('prev');
-
-    const nextMonthBtn = event.target.closest(".rangepicker__selector-control-right");
-
-    if (nextMonthBtn)
-      return this.updateSelector('next');
-
     const currentCell = event.target.closest('button');
 
     if (currentCell) {
@@ -73,7 +66,7 @@ export default class RangePicker {
         this.calendarHighlight();
       }
 
-      if (this.selected.from && this.selected.to){
+      if (this.selected.from && this.selected.to) {
         this.subElements.from.innerHTML = this.dateFormat(this.selected.from);
         this.subElements.to.innerHTML = this.dateFormat(this.selected.to);
         this.close();
@@ -81,19 +74,23 @@ export default class RangePicker {
     }
   }
 
-  updateSelector = (direction) => {
-    const { selector } = this.subElements;
-    const { currentMonth } = this.selected;
-    const go = {
-      'prev': -1,
-      'next': 1
-    };
+  addCalendar = () => {
+    this.subElements.selector.innerHTML = this.selectorTemplate(this.dateOfFirstMonth);
 
-    const newDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + go[direction], 1);
-    this.selected.currentMonth = newDate;
-
-    selector.innerHTML = this.selectorTemplate(newDate);
     this.calendarHighlight();
+
+    const prevMonthBtn = this.subElements.selector.querySelector(".rangepicker__selector-control-left");
+    const nextMonthBtn = this.subElements.selector.querySelector(".rangepicker__selector-control-right");
+
+    if (prevMonthBtn)
+      prevMonthBtn.addEventListener('click', this.onClickPrevMonth);
+
+    if (nextMonthBtn)
+      nextMonthBtn.addEventListener('click', this.onClickNextMonth);
+  }
+
+  close = () => {
+    this.element.classList.toggle("rangepicker_open");
   }
 
   calendarHighlight = () => {
@@ -101,7 +98,7 @@ export default class RangePicker {
     const { from, to } = this.selected;
     const cells = selector.querySelectorAll(".rangepicker__cell");
 
-    cells.forEach( cell => {
+    cells.forEach(cell => {
       cell.classList.remove("rangepicker__selected-between", "rangepicker__selected-from", "rangepicker__selected-to");
 
       const cellDate = cell.dataset.value;
@@ -120,7 +117,7 @@ export default class RangePicker {
     });
   }
 
-  dateFormat = date => date.toLocaleString("ru", {dateStyle: "short"});
+  dateFormat = date => new Date(date).toLocaleString("ru", {dateStyle: "short"});
 
   template () {
     const { from, to } = this.selected;
